@@ -19,6 +19,7 @@ const Dashboard = () => {
                 <WeeklyGoals />
                 <RecentWorkouts />
             </ScrollView>
+
         </View>
     );
 };
