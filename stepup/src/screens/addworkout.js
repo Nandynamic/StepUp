@@ -12,10 +12,16 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import {
+  saveWorkout,
+  updateWorkout,
+  deleteWorkout,
+  getCustomTypes,
+  addCustomType
+} from '../utils/storage';
 
 export default function AddWorkout() {
   const navigation = useNavigation();
@@ -41,7 +47,7 @@ export default function AddWorkout() {
   const intensityLevels = ['Low', 'Moderate', 'High', 'Extreme'];
 
   useEffect(() => {
-    loadData();
+    loadTypes();
     if (editingWorkout) {
       setWorkoutType(editingWorkout.type);
       setDuration(editingWorkout.duration.toString());
@@ -55,17 +61,14 @@ export default function AddWorkout() {
     }
   }, [editingWorkout, route.params]);
 
-  const loadData = async () => {
+  const loadTypes = async () => {
     try {
-      const existingDataJson = await AsyncStorage.getItem('stepup_data');
-      if (existingDataJson) {
-        const data = JSON.parse(existingDataJson);
-        if (data.customTypes) {
-          setCustomTypes(data.customTypes);
-        }
-      }
+      const types = await getCustomTypes();
+      // Filter out default types if they are returned in custom types to avoid duplicates
+      const uniqueCustom = types.filter(t => !defaultTypes.includes(t));
+      setCustomTypes(uniqueCustom);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Error loading types:', error);
     }
   };
 
@@ -86,20 +89,15 @@ export default function AddWorkout() {
       return;
     }
 
-    const updatedCustomTypes = [...customTypes, trimmedName];
-    setCustomTypes(updatedCustomTypes);
-    setWorkoutType(trimmedName);
-    setNewTypeName('');
-    setIsModalVisible(false);
-
-    // Save new type to storage
     try {
-      const existingDataJson = await AsyncStorage.getItem('stepup_data');
-      let data = existingDataJson ? JSON.parse(existingDataJson) : {};
-      data.customTypes = updatedCustomTypes;
-      await AsyncStorage.setItem('stepup_data', JSON.stringify(data));
+      await addCustomType(trimmedName);
+      setCustomTypes([...customTypes, trimmedName]);
+      setWorkoutType(trimmedName);
+      setNewTypeName('');
+      setIsModalVisible(false);
     } catch (error) {
       console.error('Error saving custom type:', error);
+      Alert.alert('Error', 'Failed to save custom type');
     }
   };
 
@@ -114,15 +112,11 @@ export default function AddWorkout() {
           style: "destructive",
           onPress: async () => {
             try {
-              const existingDataJson = await AsyncStorage.getItem('stepup_data');
-              if (existingDataJson) {
-                let data = JSON.parse(existingDataJson);
-                data.workouts = data.workouts.filter(w => w.id !== editingWorkout.id);
-                await AsyncStorage.setItem('stepup_data', JSON.stringify(data));
-                navigation.goBack();
-              }
+              await deleteWorkout(editingWorkout.id);
+              navigation.goBack();
             } catch (error) {
               console.error('Error deleting workout:', error);
+              Alert.alert('Error', 'Failed to delete workout');
             }
           }
         }
@@ -130,7 +124,7 @@ export default function AddWorkout() {
     );
   };
 
-  const saveWorkout = async () => {
+  const handleSave = async () => {
     if (!isRestDay && !duration) {
       Alert.alert('Missing Field', 'Please enter a duration for your workout.');
       return;
@@ -148,25 +142,12 @@ export default function AddWorkout() {
         isRestDay: isRestDay,
       };
 
-      const existingDataJson = await AsyncStorage.getItem('stepup_data');
-      let data = existingDataJson ? JSON.parse(existingDataJson) : {
-        workouts: [],
-        weeklyGoals: [],
-        customTypes: []
-      };
-
-      if (!data.workouts) data.workouts = [];
-
       if (editingWorkout) {
-        const index = data.workouts.findIndex(w => w.id === editingWorkout.id);
-        if (index !== -1) {
-          data.workouts[index] = workoutData;
-        }
+        await updateWorkout(workoutData);
       } else {
-        data.workouts.push(workoutData);
+        await saveWorkout(workoutData);
       }
 
-      await AsyncStorage.setItem('stepup_data', JSON.stringify(data));
       Alert.alert('Success', 'Workout saved successfully!');
       navigation.goBack();
     } catch (error) {
@@ -175,9 +156,7 @@ export default function AddWorkout() {
     }
   };
 
-  // Ensure unique types by filtering out custom types that are already in defaultTypes
-  const uniqueCustomTypes = customTypes.filter(type => !defaultTypes.includes(type));
-  const allTypes = [...defaultTypes, ...uniqueCustomTypes];
+  const allTypes = [...defaultTypes, ...customTypes];
 
   return (
     <View style={styles.container}>
@@ -334,7 +313,7 @@ export default function AddWorkout() {
           multiline
         />
 
-        <TouchableOpacity style={styles.saveButton} onPress={saveWorkout}>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
           <Ionicons name="checkmark-circle-outline" size={24} color={COLORS.background} style={{ marginRight: 8 }} />
           <Text style={styles.saveButtonText}>Save Workout</Text>
         </TouchableOpacity>

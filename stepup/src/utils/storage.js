@@ -21,6 +21,32 @@ export const saveWorkout = async (workout) => {
     }
 };
 
+export const updateWorkout = async (updatedWorkout) => {
+    try {
+        const existingWorkouts = await getWorkouts();
+        const newWorkouts = existingWorkouts.map(w =>
+            w.id === updatedWorkout.id ? updatedWorkout : w
+        );
+        await AsyncStorage.setItem(STORAGE_KEYS.WORKOUTS, JSON.stringify(newWorkouts));
+        return newWorkouts;
+    } catch (e) {
+        console.error("Error updating workout:", e);
+        return [];
+    }
+};
+
+export const deleteWorkout = async (workoutId) => {
+    try {
+        const existingWorkouts = await getWorkouts();
+        const newWorkouts = existingWorkouts.filter(w => w.id !== workoutId);
+        await AsyncStorage.setItem(STORAGE_KEYS.WORKOUTS, JSON.stringify(newWorkouts));
+        return newWorkouts;
+    } catch (e) {
+        console.error("Error deleting workout:", e);
+        return [];
+    }
+};
+
 export const getWorkouts = async () => {
     try {
         const jsonValue = await AsyncStorage.getItem(STORAGE_KEYS.WORKOUTS);
@@ -70,6 +96,21 @@ export const getCustomTypes = async () => {
         return jsonValue != null ? JSON.parse(jsonValue) : ["Strength", "Cardio", "Yoga", "HIIT", "Pilates"];
     } catch (e) {
         return ["Strength", "Cardio", "Yoga", "HIIT", "Pilates"];
+    }
+};
+
+export const addCustomType = async (newType) => {
+    try {
+        const existingTypes = await getCustomTypes();
+        if (!existingTypes.includes(newType)) {
+            const newTypes = [...existingTypes, newType];
+            await AsyncStorage.setItem(STORAGE_KEYS.CUSTOM_TYPES, JSON.stringify(newTypes));
+            return newTypes;
+        }
+        return existingTypes;
+    } catch (e) {
+        console.error("Error adding custom type:", e);
+        return [];
     }
 };
 
