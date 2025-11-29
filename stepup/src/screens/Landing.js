@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -10,9 +10,23 @@ import {
     Animated,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme } from '../context/ThemeContext';
 
 const { width, height } = Dimensions.get('window');
+
+const C = {
+    BG_PRIMARY: "#121212",
+    CARD_BG: "#1E1E1E",
+    TEXT_LIGHT: "#FFFFFFE6",
+    TEXT_MUTED: "#AAAAAA",
+    BORDER: "#333333",
+    PROGRESS_BG: "#444444",
+    PRIMARY_ACCENT: "#6C63FF",
+    ORANGE_ACCENT: "#FF8C00",
+    SUCCESS_ACCENT: "#00C853",
+    REST_DAY_ACCENT: "#F08080",
+    WHITE: "#FFFFFF",
+    BLACK: "#000000",
+};
 
 const images = [
     { id: 1, source: require('../../assets/landing-bg.jpg') },
@@ -22,7 +36,7 @@ const images = [
 
 export default function Landing({ navigation }) {
 
-    const { currentColors, isDarkMode } = useTheme();
+    const isDarkMode = true;
 
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const fadeAnim = useState(new Animated.Value(1))[0];
@@ -66,7 +80,7 @@ export default function Landing({ navigation }) {
     }, [fadeAnim]);
 
     return (
-        <View style={[styles.container, { backgroundColor: currentColors.background }]}>
+        <View style={[styles.container, { backgroundColor: C.BG_PRIMARY }]}>
             <StatusBar barStyle={isDarkMode ? "light-content" : "dark-content"} />
 
             <Animated.View style={[styles.backgroundContainer, { opacity: fadeAnim }]}>
@@ -80,21 +94,21 @@ export default function Landing({ navigation }) {
             <LinearGradient
                 colors={[
                     'transparent',
-                    isDarkMode ? 'rgba(0,20,10,0.85)' : 'rgba(255,255,255,0.4)',
-                    isDarkMode ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.7)',
+                    'rgba(0,20,10,0.85)',
+                    'rgba(0,0,0,0.8)',
                 ]}
                 style={styles.gradient}
             >
                 <View style={styles.content}>
 
                     <View style={styles.brandingContainer}>
-                        <Text style={[styles.logo, { color: currentColors.text }]}>stepUp</Text>
+                        <Text style={[styles.logo, { color: C.TEXT_LIGHT }]}>stepUp</Text>
 
-                        <Text style={[styles.tagline, { color: currentColors.secondaryText }]}>
+                        <Text style={[styles.tagline, { color: C.TEXT_MUTED }]}>
                             Take Control of Your Fitness
                         </Text>
 
-                        <Text style={[styles.description, { color: currentColors.secondaryText }]}>
+                        <Text style={[styles.description, { color: C.TEXT_MUTED }]}>
                             The ultimate tool for manually logging every lift,{'\n'}
                             run, and workout. Track your progress, your way.
                         </Text>
@@ -108,8 +122,8 @@ export default function Landing({ navigation }) {
                                     style={[
                                         styles.dot,
                                         index === currentImageIndex
-                                            ? { backgroundColor: currentColors.text, width: 24 }
-                                            : { backgroundColor: currentColors.secondaryText }
+                                            ? { backgroundColor: C.TEXT_LIGHT, width: 24 }
+                                            : { backgroundColor: C.TEXT_MUTED }
                                     ]}
                                 />
                             ))}
@@ -118,12 +132,12 @@ export default function Landing({ navigation }) {
                         <TouchableOpacity
                             style={[
                                 styles.primaryButton,
-                                { backgroundColor: currentColors.accent }
+                                { backgroundColor: C.PRIMARY_ACCENT }
                             ]}
                             onPress={() => navigation.navigate('Register')}
                             activeOpacity={0.8}
                         >
-                            <Text style={[styles.primaryButtonText, { color: currentColors.buttonText }]}>
+                            <Text style={[styles.primaryButtonText, { color: C.WHITE }]}>
                                 Create Account
                             </Text>
                         </TouchableOpacity>
@@ -131,22 +145,22 @@ export default function Landing({ navigation }) {
                         <TouchableOpacity
                             style={[
                                 styles.secondaryButton,
-                                { borderColor: currentColors.accent }
+                                { borderColor: C.PRIMARY_ACCENT }
                             ]}
                             onPress={() => navigation.navigate('Login')}
                             activeOpacity={0.8}
                         >
-                            <Text style={[styles.secondaryButtonText, { color: currentColors.accent }]}>
+                            <Text style={[styles.secondaryButtonText, { color: C.PRIMARY_ACCENT }]}>
                                 Log In
                             </Text>
                         </TouchableOpacity>
 
-                        <Text style={[styles.termsText, { color: currentColors.secondaryText }]}>
+                        <Text style={[styles.termsText, { color: C.TEXT_MUTED }]}>
                             By continuing, you agree to our{' '}
-                            <Text style={[styles.termsLink, { color: currentColors.text }]}>
+                            <Text style={[styles.termsLink, { color: C.TEXT_LIGHT }]}>
                                 Terms of Service
                             </Text> and{'\n'}
-                            <Text style={[styles.termsLink, { color: currentColors.text }]}>
+                            <Text style={[styles.termsLink, { color: C.TEXT_LIGHT }]}>
                                 Privacy Policy
                             </Text>.
                         </Text>
