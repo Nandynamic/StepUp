@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
@@ -14,24 +13,20 @@ import { useIsFocused, useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Calendar } from 'react-native-calendars';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { COLORS, FONTS, SIZES } from '../constants/theme'; // same constants as AddWorkout
+import { COLORS, FONTS, SIZES } from '../constants/theme';
 
-// constants
 const BLUE = '#4C9FFF';
-const CARD = COLORS.cardDark || '#111';
-const BACKGROUND = COLORS.background || '#000';
-const TEXT_WHITE = COLORS.textWhite || '#fff';
-const TEXT_GRAY = COLORS.textGray || '#9AA0A6';
+const CARD = '#ffffff';
+const BACKGROUND = '#F7F9FC';
+const TEXT_WHITE = '#000';
+const TEXT_GRAY = '#555';
 
-// date helpers
 const isoToDate = (iso) => {
-  // iso like "2025-11-29"
   return new Date(iso + 'T00:00:00');
 };
 
 const formatDisplayDate = (iso) => {
   const d = isoToDate(iso);
-  // e.g., Nov 27
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 };
 
@@ -40,10 +35,10 @@ export default function Workouts() {
   const isFocused = useIsFocused();
 
   const [workouts, setWorkouts] = useState([]);
-  const [view, setView] = useState('History'); // 'History' or 'Calendar'
-  const [dateRange, setDateRange] = useState('This Month'); // 'This Month' | 'This Week' | 'All Time'
+  const [view, setView] = useState('History');
+  const [dateRange, setDateRange] = useState('This Month');
   const [typeFilter, setTypeFilter] = useState('All Workouts');
-  const [sortBy, setSortBy] = useState('Date (Newest)'); // Date (Newest), Date (Oldest), Duration, Calories
+  const [sortBy, setSortBy] = useState('Date (Newest)');
   const [isFilterModalVisible, setFilterModalVisible] = useState(false);
 
   useEffect(() => {
@@ -55,16 +50,13 @@ export default function Workouts() {
       const json = await AsyncStorage.getItem('stepup_data');
       const data = json ? JSON.parse(json) : {};
       const arr = data.workouts || [];
-      // ensure date format and types
-      setWorkouts(arr.slice()); // copy
+      setWorkouts(arr.slice());
     } catch (e) {
       console.error('Failed to load workouts', e);
     }
   };
 
   const saveWorkoutsToStorage = async (newList) => {
-    console.log("Workout Saved:", workoutData);
-
     try {
       const json = await AsyncStorage.getItem('stepup_data');
       const data = json ? JSON.parse(json) : { workouts: [], weeklyGoals: [], customTypes: [] };
@@ -98,7 +90,6 @@ export default function Workouts() {
     navigation.navigate('AddWorkout', { workout });
   };
 
-  // derive list of types from workouts + default ones
   const workoutTypes = useMemo(() => {
     const set = new Set(['All Workouts']);
     workouts.forEach(w => {
@@ -107,17 +98,17 @@ export default function Workouts() {
     return Array.from(set);
   }, [workouts]);
 
-  // Date range filter implementation
   const filterByDateRange = (list) => {
     if (dateRange === 'All Time') return list;
 
     const now = new Date();
     let startDate;
+
     if (dateRange === 'This Month') {
       startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     } else if (dateRange === 'This Week') {
-      const day = now.getDay(); // 0 (Sun) - 6
-      const diff = now.getDate() - day; // start of week (Sunday)
+      const day = now.getDay();
+      const diff = now.getDate() - day;
       startDate = new Date(now.getFullYear(), now.getMonth(), Math.max(1, diff));
     } else {
       startDate = null;
@@ -132,13 +123,11 @@ export default function Workouts() {
     });
   };
 
-  // type filter
   const filterByType = (list) => {
     if (!typeFilter || typeFilter === 'All Workouts') return list;
     return list.filter(w => w.type === typeFilter);
   };
 
-  // sort
   const sortList = (list) => {
     const copy = list.slice();
     if (sortBy === 'Date (Newest)') {
@@ -160,7 +149,6 @@ export default function Workouts() {
     return sorted;
   }, [workouts, dateRange, typeFilter, sortBy]);
 
-  // calendar markings
   const markedDates = useMemo(() => {
     const marks = {};
     workouts.forEach(w => {
@@ -169,7 +157,6 @@ export default function Workouts() {
       if (!marks[k]) {
         marks[k] = { dots: [{ color: BLUE }], marked: true };
       } else {
-        // multiple workouts same day -> show multiple dots
         const existing = marks[k].dots || [];
         if (existing.length < 3) existing.push({ color: BLUE });
         marks[k] = { ...marks[k], dots: existing, marked: true };
@@ -178,15 +165,11 @@ export default function Workouts() {
     return marks;
   }, [workouts]);
 
-  // calendar day press -> filter by that date
   const onDayPress = (day) => {
-    // day.dateString like '2025-11-29'
-    // We'll set dateRange to 'All Time' and a temporary type of filter 'Selected Day' by setting typeFilter to that exact date
     setDateRange('All Time');
     setTypeFilter(`__DAY__${day.dateString}`);
   };
 
-  // when typeFilter starts with __DAY__, we interpret it as selecting a single day
   const finalDisplayed = useMemo(() => {
     if (typeFilter && typeFilter.startsWith('__DAY__')) {
       const target = typeFilter.replace('__DAY__', '');
@@ -195,7 +178,6 @@ export default function Workouts() {
     return displayed;
   }, [typeFilter, displayed, workouts, sortBy]);
 
-  // UI components
   const Header = () => (
     <View style={styles.header}>
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconBtn}>
@@ -231,7 +213,6 @@ export default function Workouts() {
   const FilterRow = () => (
     <View style={styles.filterRow}>
       <TouchableOpacity style={styles.filterBtn} onPress={() => {
-        // cycle date range quickly: This Month -> This Week -> All Time -> This Month
         const order = ['This Month', 'This Week', 'All Time'];
         const next = order[(order.indexOf(dateRange) + 1) % order.length];
         setDateRange(next);
@@ -240,11 +221,14 @@ export default function Workouts() {
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.filterBtn} onPress={() => setFilterModalVisible(true)}>
-        <Text style={styles.filterText}>Filter by Type: {typeFilter === 'All Workouts' ? 'All Workouts' : (typeFilter.startsWith('__DAY__') ? `Day ${typeFilter.replace('__DAY__','')}` : typeFilter)}</Text>
+        <Text style={styles.filterText}>
+          {typeFilter.startsWith('__DAY__')
+            ? `Day ${typeFilter.replace('__DAY__', '')}`
+            : `Type: ${typeFilter}`}
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.filterBtn} onPress={() => {
-        // cycle sort options
         const order = ['Date (Newest)', 'Date (Oldest)', 'Duration', 'Calories'];
         const next = order[(order.indexOf(sortBy) + 1) % order.length];
         setSortBy(next);
@@ -258,7 +242,7 @@ export default function Workouts() {
     <View style={styles.card}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <View style={styles.iconCircle}>
-          <MaterialCommunityIcons name={iconNameForType(item.type)} size={22} color={BACKGROUND} />
+          <MaterialCommunityIcons name={iconNameForType(item.type)} size={22} color={'#fff'} />
         </View>
         <View style={{ flex: 1, marginLeft: 12 }}>
           <Text style={styles.cardTitle}>{item.type}</Text>
@@ -276,15 +260,13 @@ export default function Workouts() {
     </View>
   );
 
-  // helper: map type to icon (small mapping)
   function iconNameForType(type) {
     if (!type) return 'run';
     const t = type.toLowerCase();
     if (t.includes('strength') || t.includes('weight')) return 'dumbbell';
     if (t.includes('run') || t.includes('cardio')) return 'run';
-    if (t.includes('yoga')) return 'yoga'; // may not exist in all icon sets; fallback
+    if (t.includes('yoga')) return 'yoga';
     if (t.includes('hiit')) return 'fire';
-    if (t.includes('pilates')) return 'human-greeting';
     if (t.includes('rest')) return 'bed-empty';
     return 'run';
   }
@@ -299,7 +281,6 @@ export default function Workouts() {
     return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   }
 
-  // show more menu (Edit / Delete)
   const openMoreMenu = (item) => {
     Alert.alert(
       'Options',
@@ -327,11 +308,11 @@ export default function Workouts() {
             theme={{
               backgroundColor: BACKGROUND,
               calendarBackground: BACKGROUND,
-              monthTextColor: TEXT_WHITE,
-              dayTextColor: TEXT_WHITE,
+              monthTextColor: '#000',
+              dayTextColor: '#000',
               selectedDayBackgroundColor: BLUE,
               textSectionTitleColor: TEXT_GRAY,
-              arrowColor: TEXT_WHITE,
+              arrowColor: '#000',
               todayTextColor: BLUE,
             }}
           />
@@ -347,18 +328,15 @@ export default function Workouts() {
           />
         </View>
       ) : (
-        <>
-          <FlatList
-            data={finalDisplayed}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            contentContainerStyle={{ padding: 15, paddingBottom: 120 }}
-            ListEmptyComponent={<Text style={styles.emptyText}>No workouts yet. Log one now!</Text>}
-          />
-        </>
+        <FlatList
+          data={finalDisplayed}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          contentContainerStyle={{ padding: 15, paddingBottom: 120 }}
+          ListEmptyComponent={<Text style={styles.emptyText}>No workouts yet. Log one now!</Text>}
+        />
       )}
 
-      {/* Filter Modal (type select) */}
       <Modal
         visible={isFilterModalVisible}
         transparent
@@ -378,7 +356,10 @@ export default function Workouts() {
                       setTypeFilter(item);
                       setFilterModalVisible(false);
                     }}
-                    style={[styles.typeRow, item === typeFilter && { backgroundColor: '#0d2233' }]}
+                    style={[
+                      styles.typeRow,
+                      item === typeFilter && { backgroundColor: '#E6F2FF' }
+                    ]}
                   >
                     <Text style={{ color: TEXT_WHITE }}>{item}</Text>
                   </TouchableOpacity>
@@ -413,22 +394,20 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: CARD,
+    backgroundColor: '#e8e8e8',
     justifyContent: 'center',
     alignItems: 'center',
   },
   tabRow: {
     flexDirection: 'row',
     margin: 15,
-    backgroundColor: 'transparent',
-    borderRadius: 30,
     alignSelf: 'center',
     overflow: 'hidden',
   },
   tabBtn: {
     paddingVertical: 8,
     paddingHorizontal: 26,
-    backgroundColor: CARD,
+    backgroundColor: '#e5e5e5',
     marginHorizontal: 6,
     borderRadius: 25,
   },
@@ -436,11 +415,11 @@ const styles = StyleSheet.create({
     backgroundColor: BLUE,
   },
   tabText: {
-    color: TEXT_GRAY,
+    color: '#555',
     fontWeight: '700',
   },
   tabTextActive: {
-    color: BACKGROUND,
+    color: '#fff',
   },
   filterRow: {
     flexDirection: 'row',
@@ -448,7 +427,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   filterBtn: {
-    backgroundColor: CARD,
+    backgroundColor: '#e5e5e5',
     padding: 10,
     borderRadius: 20,
     marginVertical: 8,
@@ -472,9 +451,9 @@ const styles = StyleSheet.create({
     padding: 14,
     marginBottom: 12,
     shadowColor: '#000',
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.06,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 2,
   },
   iconCircle: {
     width: 52,
@@ -485,7 +464,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cardTitle: {
-    color: TEXT_WHITE,
+    color: '#000',
     fontSize: 16,
     fontWeight: '700',
   },
@@ -507,7 +486,7 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -529,4 +508,3 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-

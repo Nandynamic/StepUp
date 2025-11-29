@@ -9,7 +9,11 @@ import WeeklyGoals from '../components/dashboard/WeeklyGoals';
 const Dashboard = () => {
     return (
         <View style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor={COLORS.background} />
+            <StatusBar 
+                barStyle="dark-content"   
+                backgroundColor="#FFFFFF" 
+            />
+
             <ScrollView
                 contentContainerStyle={styles.scrollContent}
                 showsVerticalScrollIndicator={false}
@@ -27,7 +31,7 @@ const Dashboard = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: COLORS.background,
+        backgroundColor: "#FFFFFF", 
     },
     scrollContent: {
         paddingBottom: 100,

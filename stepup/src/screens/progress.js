@@ -90,17 +90,15 @@ const Progress = () => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="chevron-back" size={24} color={COLORS.textWhite} />
+          <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Progress Summary</Text>
         <View style={{ width: 24 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Streak Card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Ionicons name="flame" size={20} color={COLORS.primaryOrange} />
@@ -109,7 +107,6 @@ const Progress = () => {
           <Text style={styles.largeValue}>{streak} Days</Text>
         </View>
 
-        {/* Best Week Card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Ionicons name="trophy-outline" size={20} color={COLORS.primaryBlue} />
@@ -120,7 +117,6 @@ const Progress = () => {
 
         <Text style={styles.sectionTitle}>This Week's Breakdown</Text>
 
-        {/* Weekly Breakdown Card */}
         <View style={styles.card}>
           <Text style={styles.subLabel}>Total Workout Time</Text>
           <Text style={styles.mediumValue}>{formatDuration(totalDuration)}</Text>
@@ -132,7 +128,7 @@ const Progress = () => {
             {['Cardio', 'Strength', 'Yoga', 'HIIT'].map((type) => {
               const typeData = weeklyBreakdown.find(item => item.type === type);
               const minutes = typeData ? typeData.duration : 0;
-              const max = 300; // Arbitrary max for visualization
+              const max = 300;
               const width = Math.min((minutes / max) * 100, 100);
 
               return (
@@ -149,7 +145,6 @@ const Progress = () => {
 
         <Text style={styles.sectionTitle}>Maintain Your Streak</Text>
 
-        {/* Streak Calendar Card */}
         <View style={styles.card}>
           <View style={styles.calendarRow}>
             {calendarData.map((day, index) => (
@@ -166,9 +161,9 @@ const Progress = () => {
                   onPress={() => handleCalendarPress(day)}
                   disabled={day.status === 'future'}
                 >
-                  {day.status === 'completed' && <Ionicons name="checkmark" size={16} color={COLORS.textWhite} />}
-                  {day.status === 'rest' && <MaterialCommunityIcons name="meditation" size={16} color={COLORS.textWhite} />}
-                  {day.status === 'today' && <Ionicons name="add" size={16} color={COLORS.textWhite} />}
+                  {day.status === 'completed' && <Ionicons name="checkmark" size={16} color="#fff" />}
+                  {day.status === 'rest' && <MaterialCommunityIcons name="meditation" size={16} color="#fff" />}
+                  {day.status === 'today' && <Ionicons name="add" size={16} color="#000" />}
                 </TouchableOpacity>
               </View>
             ))}
@@ -183,13 +178,13 @@ const Progress = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background, // Dark green/black background
+    backgroundColor: "#FFFFFF",
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.background,
+    backgroundColor: "#FFFFFF",
   },
   header: {
     flexDirection: 'row',
@@ -198,23 +193,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
+    backgroundColor: "#FFFFFF"
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.textWhite,
+    color: "#000",
   },
   scrollContent: {
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
   card: {
-    backgroundColor: COLORS.cardDark,
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: COLORS.cardBorder,
+    borderColor: "#E5E5E5",
   },
   cardHeader: {
     flexDirection: 'row',
@@ -223,35 +219,35 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   cardLabel: {
-    color: COLORS.textGray,
+    color: "#555",
     fontSize: 14,
     fontWeight: '500',
   },
   largeValue: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: COLORS.textWhite,
+    color: "#000",
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: COLORS.textWhite,
+    color: "#000",
     marginTop: 16,
     marginBottom: 12,
   },
   subLabel: {
-    color: COLORS.textGray,
+    color: "#555",
     fontSize: 14,
     marginBottom: 4,
   },
   mediumValue: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: COLORS.textWhite,
+    color: "#000",
     marginBottom: 4,
   },
   comparisonText: {
-    color: COLORS.textGray,
+    color: "#555",
     fontSize: 14,
     marginBottom: 24,
   },
@@ -264,14 +260,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   breakdownLabel: {
-    color: COLORS.textGray,
+    color: "#555",
     fontSize: 14,
     width: 70,
   },
   progressBarContainer: {
     flex: 1,
     height: 8,
-    backgroundColor: COLORS.cardBorder,
+    backgroundColor: "#DDD",
     borderRadius: 4,
     marginLeft: 12,
   },
@@ -290,7 +286,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   dayLabel: {
-    color: COLORS.textGray,
+    color: "#555",
     fontSize: 12,
     fontWeight: '600',
   },
@@ -300,25 +296,24 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.cardBorder,
+    backgroundColor: "#EEE",
   },
   completedIndicator: {
-    backgroundColor: COLORS.success, // Dark green
+    backgroundColor: COLORS.success,
   },
   restIndicator: {
-    backgroundColor: COLORS.secondaryBackground,
+    backgroundColor: "#FFC0CB",
   },
   todayIndicator: {
-    backgroundColor: COLORS.cardBorder,
+    backgroundColor: "#FFF",
     borderWidth: 1,
     borderColor: COLORS.primaryBlue,
-    borderStyle: 'dashed',
   },
   futureIndicator: {
     opacity: 0.3,
   },
   helperText: {
-    color: COLORS.textGray,
+    color: "#555",
     fontSize: 12,
     textAlign: 'center',
   },

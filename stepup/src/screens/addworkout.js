@@ -35,7 +35,6 @@ export default function AddWorkout() {
   const [notes, setNotes] = useState('');
   const [isRestDay, setIsRestDay] = useState(false);
 
-  // New Fields
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [calories, setCalories] = useState('');
@@ -66,12 +65,9 @@ export default function AddWorkout() {
   const loadTypes = async () => {
     try {
       const types = await getCustomTypes();
-      // Filter out default types if they are returned in custom types to avoid duplicates
       const uniqueCustom = types.filter(t => !defaultTypes.includes(t));
       setCustomTypes(uniqueCustom);
-    } catch (error) {
-      console.error('Error loading types:', error);
-    }
+    } catch (error) {}
   };
 
   const handleDateChange = (event, selectedDate) => {
@@ -83,14 +79,11 @@ export default function AddWorkout() {
 
   const handleAddCustomType = async () => {
     if (!newTypeName.trim()) return;
-
     const trimmedName = newTypeName.trim();
-
     if (defaultTypes.includes(trimmedName) || customTypes.includes(trimmedName)) {
       Alert.alert('Error', 'This workout type already exists.');
       return;
     }
-
     try {
       await addCustomType(trimmedName);
       setCustomTypes([...customTypes, trimmedName]);
@@ -98,7 +91,6 @@ export default function AddWorkout() {
       setNewTypeName('');
       setIsModalVisible(false);
     } catch (error) {
-      console.error('Error saving custom type:', error);
       Alert.alert('Error', 'Failed to save custom type');
     }
   };
@@ -117,7 +109,6 @@ export default function AddWorkout() {
               await deleteWorkout(editingWorkout.id);
               navigation.goBack();
             } catch (error) {
-              console.error('Error deleting workout:', error);
               Alert.alert('Error', 'Failed to delete workout');
             }
           }
@@ -127,54 +118,43 @@ export default function AddWorkout() {
   };
 
   const handleSave = async () => {
-  if (!isRestDay && !duration) {
-    Alert.alert('Missing Field', 'Please enter a duration for your workout.');
-    return;
-  }
-
-  try {
-    const workoutData = {
-      id: editingWorkout ? editingWorkout.id : `uuid-${Date.now()}`,
-      date: date.toISOString().split('T')[0],
-      type: isRestDay ? 'Rest' : workoutType,
-      duration: isRestDay ? 0 : parseInt(duration),
-      calories: isRestDay ? 0 : parseInt(calories) || 0,
-      intensity: isRestDay ? 'Rest' : intensity,
-      notes,
-      isRestDay
-    };
-
-    if (editingWorkout) {
-      // EDIT MODE
-      const json = await AsyncStorage.getItem("stepup_data");
-      const data = json ? JSON.parse(json) : { workouts: [] };
-
-      const updated = data.workouts.map(w =>
-        w.id === workoutData.id ? workoutData : w
-      );
-
-      data.workouts = updated;
-      await AsyncStorage.setItem("stepup_data", JSON.stringify(data));
-
-    } else {
-      // ADD NEW WORKOUT
-      const json = await AsyncStorage.getItem("stepup_data");
-      const data = json ? JSON.parse(json) : { workouts: [] };
-
-      data.workouts.push(workoutData);
-
-      await AsyncStorage.setItem("stepup_data", JSON.stringify(data));
+    if (!isRestDay && !duration) {
+      Alert.alert('Missing Field', 'Please enter a duration for your workout.');
+      return;
     }
 
-    Alert.alert('Success', 'Workout saved successfully!');
-    navigation.goBack();
+    try {
+      const workoutData = {
+        id: editingWorkout ? editingWorkout.id : `uuid-${Date.now()}`,
+        date: date.toISOString().split('T')[0],
+        type: isRestDay ? 'Rest' : workoutType,
+        duration: isRestDay ? 0 : parseInt(duration),
+        calories: isRestDay ? 0 : parseInt(calories) || 0,
+        intensity: isRestDay ? 'Rest' : intensity,
+        notes,
+        isRestDay
+      };
 
-  } catch (error) {
-    console.error('Error saving workout:', error);
-    Alert.alert('Error', 'Failed to save workout');
-  }
-};
+      const json = await AsyncStorage.getItem("stepup_data");
+      const data = json ? JSON.parse(json) : { workouts: [] };
 
+      if (editingWorkout) {
+        const updated = data.workouts.map(w =>
+          w.id === workoutData.id ? workoutData : w
+        );
+        data.workouts = updated;
+      } else {
+        data.workouts.push(workoutData);
+      }
+
+      await AsyncStorage.setItem("stepup_data", JSON.stringify(data));
+      Alert.alert('Success', 'Workout saved successfully!');
+      navigation.goBack();
+
+    } catch (error) {
+      Alert.alert('Error', 'Failed to save workout');
+    }
+  };
 
   const allTypes = [...defaultTypes, ...customTypes];
 
@@ -182,12 +162,12 @@ export default function AddWorkout() {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.iconButton}>
-          <Ionicons name="close" size={24} color={COLORS.textWhite} />
+          <Ionicons name="close" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={FONTS.h2}>{editingWorkout ? 'Edit Workout' : 'Log Workout'}</Text>
+        <Text style={[FONTS.h2, { color: "#000" }]}>{editingWorkout ? 'Edit Workout' : 'Log Workout'}</Text>
         {editingWorkout ? (
           <TouchableOpacity style={styles.iconButton} onPress={handleDelete}>
-            <Ionicons name="trash-outline" size={24} color={COLORS.primaryOrange} />
+            <Ionicons name="trash-outline" size={24} color="red" />
           </TouchableOpacity>
         ) : (
           <View style={{ width: 40 }} />
@@ -195,14 +175,12 @@ export default function AddWorkout() {
       </View>
 
       <ScrollView style={styles.scrollView} contentContainerStyle={{ paddingBottom: 100 }}>
-
-        {/* Date Picker */}
         <TouchableOpacity style={styles.dateCard} onPress={() => setShowDatePicker(true)}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Ionicons name="calendar-outline" size={24} color={COLORS.textWhite} style={{ marginRight: 10 }} />
+            <Ionicons name="calendar-outline" size={24} color="#000" style={{ marginRight: 10 }} />
             <Text style={styles.dateText}>{date.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</Text>
           </View>
-          <Ionicons name="chevron-down" size={20} color={COLORS.textGray} />
+          <Ionicons name="chevron-down" size={20} color="gray" />
         </TouchableOpacity>
 
         {showDatePicker && (
@@ -212,15 +190,14 @@ export default function AddWorkout() {
             display={Platform.OS === 'ios' ? 'spinner' : 'default'}
             onChange={handleDateChange}
             maximumDate={new Date()}
-            themeVariant="dark"
+            themeVariant="light"
           />
         )}
 
-        {/* Rest Day Toggle */}
         <View style={styles.card}>
           <View style={styles.rowCenter}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <MaterialCommunityIcons name="bed-outline" size={24} color={COLORS.textWhite} style={{ marginRight: 10 }} />
+              <MaterialCommunityIcons name="bed-outline" size={24} color="#000" style={{ marginRight: 10 }} />
               <Text style={styles.label}>Rest Day</Text>
             </View>
             <Switch
@@ -235,7 +212,6 @@ export default function AddWorkout() {
 
         {!isRestDay && (
           <>
-            {/* Workout Type Selector */}
             <Text style={styles.sectionTitle}>Workout Type</Text>
             <View style={styles.typeContainer}>
               {allTypes.map((type) => (
@@ -261,12 +237,11 @@ export default function AddWorkout() {
                 style={[styles.typeButton, styles.addTypeButton]}
                 onPress={() => setIsModalVisible(true)}
               >
-                <Ionicons name="add" size={20} color={COLORS.textWhite} />
+                <Ionicons name="add" size={20} color="#000" />
                 <Text style={[styles.typeText, { marginLeft: 5 }]}>Custom</Text>
               </TouchableOpacity>
             </View>
 
-            {/* Duration & Calories Row */}
             <View style={styles.rowContainer}>
               <View style={[styles.inputCard, { flex: 1, marginRight: 10 }]}>
                 <Text style={styles.inputLabel}>Duration</Text>
@@ -277,7 +252,7 @@ export default function AddWorkout() {
                     onChangeText={setDuration}
                     keyboardType="numeric"
                     placeholder="0"
-                    placeholderTextColor={COLORS.textGray}
+                    placeholderTextColor="gray"
                   />
                   <Text style={styles.unitText}>min</Text>
                 </View>
@@ -292,14 +267,13 @@ export default function AddWorkout() {
                     onChangeText={setCalories}
                     keyboardType="numeric"
                     placeholder="0"
-                    placeholderTextColor={COLORS.textGray}
+                    placeholderTextColor="gray"
                   />
                   <Text style={styles.unitText}>kcal</Text>
                 </View>
               </View>
             </View>
 
-            {/* Intensity Selector */}
             <Text style={styles.sectionTitle}>Intensity</Text>
             <View style={styles.typeContainer}>
               {intensityLevels.map((level) => (
@@ -312,34 +286,36 @@ export default function AddWorkout() {
                   ]}
                   onPress={() => setIntensity(level)}
                 >
-                  <Text style={[
-                    styles.typeText,
-                    intensity === level && styles.typeTextActive
-                  ]}>{level}</Text>
+                  <Text
+                    style={[
+                      styles.typeText,
+                      intensity === level && styles.typeTextActive
+                    ]}
+                  >
+                    {level}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
           </>
         )}
 
-        {/* Workout Notes */}
         <Text style={styles.sectionTitle}>Notes</Text>
         <TextInput
           style={styles.notesInput}
           value={notes}
           onChangeText={setNotes}
           placeholder="How did it feel?..."
-          placeholderTextColor={COLORS.textGray}
+          placeholderTextColor="gray"
           multiline
         />
 
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Ionicons name="checkmark-circle-outline" size={24} color={COLORS.background} style={{ marginRight: 8 }} />
+          <Ionicons name="checkmark-circle-outline" size={24} color="#fff" style={{ marginRight: 8 }} />
           <Text style={styles.saveButtonText}>Save Workout</Text>
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Custom Type Modal */}
       <Modal
         visible={isModalVisible}
         transparent={true}
@@ -354,7 +330,7 @@ export default function AddWorkout() {
               value={newTypeName}
               onChangeText={setNewTypeName}
               placeholder="e.g. Pilates"
-              placeholderTextColor={COLORS.textGray}
+              placeholderTextColor="gray"
               autoFocus
             />
             <View style={styles.modalButtons}>
@@ -368,7 +344,7 @@ export default function AddWorkout() {
                 style={[styles.modalButton, styles.confirmButton]}
                 onPress={handleAddCustomType}
               >
-                <Text style={[styles.modalButtonText, { color: COLORS.background }]}>Add</Text>
+                <Text style={[styles.modalButtonText, { color: "#fff" }]}>Add</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -382,7 +358,7 @@ export default function AddWorkout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: "#fff",
     paddingTop: 20,
   },
   header: {
@@ -394,7 +370,7 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     padding: 8,
-    backgroundColor: COLORS.cardDark,
+    backgroundColor: "#eee",
     borderRadius: 20,
   },
   scrollView: {
@@ -402,20 +378,20 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...FONTS.h3,
-    color: COLORS.textWhite,
+    color: "#000",
     marginBottom: 15,
     marginTop: 10,
     fontWeight: 'bold',
     fontSize: 18,
   },
   card: {
-    backgroundColor: COLORS.cardDark,
+    backgroundColor: "#f2f2f2",
     borderRadius: 15,
     padding: 15,
     marginBottom: 20,
   },
   dateCard: {
-    backgroundColor: COLORS.cardDark,
+    backgroundColor: "#f2f2f2",
     borderRadius: 15,
     padding: 15,
     marginBottom: 20,
@@ -424,7 +400,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dateText: {
-    color: COLORS.textWhite,
+    color: "#000",
     fontSize: 16,
     fontWeight: '600',
   },
@@ -435,12 +411,12 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   label: {
-    color: COLORS.textWhite,
+    color: "#000",
     fontSize: 16,
     fontWeight: '600',
   },
   subtext: {
-    color: COLORS.textGray,
+    color: "gray",
     fontSize: 12,
   },
   typeContainer: {
@@ -452,29 +428,29 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 25,
-    backgroundColor: COLORS.cardDark,
+    backgroundColor: "#e6e6e6",
     marginRight: 10,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: COLORS.cardDark,
+    borderColor: "#ccc",
   },
   typeButtonActive: {
     backgroundColor: "#4C9FFF",
     borderColor: "#4C9FFF",
   },
   typeText: {
-    color: COLORS.textGray,
+    color: "#333",
     fontWeight: '600',
     fontSize: 14,
   },
   typeTextActive: {
-    color: COLORS.background,
+    color: "#fff",
   },
   addTypeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#333',
-    borderColor: '#333',
+    backgroundColor: "#e6e6e6",
+    borderColor: "#ccc",
   },
   rowContainer: {
     flexDirection: 'row',
@@ -482,34 +458,34 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   inputCard: {
-    backgroundColor: COLORS.cardDark,
+    backgroundColor: "#f2f2f2",
     borderRadius: 15,
     padding: 15,
     alignItems: 'center',
     justifyContent: 'center',
   },
   inputLabel: {
-    color: COLORS.textGray,
+    color: "gray",
     fontSize: 14,
     marginBottom: 5,
   },
   durationInput: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: COLORS.textWhite,
+    color: "#000",
     minWidth: 40,
     textAlign: 'center',
   },
   unitText: {
-    color: COLORS.textGray,
+    color: "gray",
     fontSize: 14,
     marginLeft: 5,
   },
   notesInput: {
-    backgroundColor: COLORS.cardDark,
+    backgroundColor: "#f2f2f2",
     borderRadius: 15,
     padding: 15,
-    color: COLORS.textWhite,
+    color: "#000",
     height: 100,
     textAlignVertical: 'top',
     marginBottom: 20,
@@ -525,32 +501,32 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   saveButtonText: {
-    color: COLORS.background,
+    color: "#fff",
     fontWeight: 'bold',
     fontSize: 18,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
+    backgroundColor: 'rgba(0,0,0,0.3)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
     width: '80%',
-    backgroundColor: COLORS.cardDark,
+    backgroundColor: "#fff",
     borderRadius: 20,
     padding: 20,
   },
   modalTitle: {
-    color: COLORS.textWhite,
+    color: "#000",
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 15,
     textAlign: 'center',
   },
   modalInput: {
-    backgroundColor: '#000',
-    color: COLORS.textWhite,
+    backgroundColor: "#f2f2f2",
+    color: "#000",
     padding: 15,
     borderRadius: 10,
     marginBottom: 20,
@@ -567,7 +543,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: '#333',
+    backgroundColor: "#e6e6e6",
     marginRight: 10,
   },
   confirmButton: {
@@ -575,7 +551,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   modalButtonText: {
-    color: COLORS.textWhite,
+    color: "#000",
     fontWeight: '600',
   },
 });
